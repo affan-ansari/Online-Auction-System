@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Products</h1>
+    <a href="{% url 'product-create' %}">
+      <button class="btn btn-outline-success">Add Product</button>
+    </a>
+    <ul>
+      {% for product in products %}
+          <a href="{% url 'product-detail' product.id %}">
+            <li>{{ product.title }} - Minimum Bid: {{ product.minimum_bid }}</li>
+          </a>
+      {% endfor %}
+    </ul>
+
+{% endblock content %}

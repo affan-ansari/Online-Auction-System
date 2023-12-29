@@ -11,7 +11,7 @@ def index(request):
 
 def user_signup(request):
     if request.user.is_authenticated:
-        return redirect('index')
+        return redirect('auction-home')
     if request.method == 'POST':
         form = SignupForm(request.POST, request.FILES)
         if form.is_valid():
@@ -24,7 +24,7 @@ def user_signup(request):
 
 def user_logout(request):
     logout(request)
-    return redirect('index')
+    return redirect('login')
 
 
 @login_required

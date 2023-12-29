@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>AUCTION HOME PAGE</h1>
+    <a href="#">
+      <button class="btn btn-primary">Auctions</button>
+    </a>
+    <a href="{% url 'products-list' %}">
+      <button class="btn btn-primary">Products</button>
+    </a>
+{% endblock content %}
