@@ -4,7 +4,11 @@ from django.db import models
 
 
 class User(AbstractUser):
-    pass
+    is_seller = models.BooleanField(default=False, blank=False)
+    is_buyer = models.BooleanField(default=True, blank=False)
+    email = models.EmailField(unique=True, blank=False)
+    image = models.ImageField(
+        upload_to='profile_images', default='profile_images/avatar.png')
 
 
 class Seller(models.Model):
