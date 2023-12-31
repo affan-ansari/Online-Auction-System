@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Auctions</h1>
+    <a href="{% url 'auction-create' %}">
+      <button class="btn btn-outline-success">Add Auction</button>
+    </a>
+    <ul>
+      {% for auction in auctions %}
+          <a href="{% url 'auction-detail' auction.id %}">
+            <li>{{ auction.title }} - Seller email: {{ auction.seller.user.email }}</li>
+          </a>
+      {% endfor %}
+    </ul>
+
+{% endblock content %}

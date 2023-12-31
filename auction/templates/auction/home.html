@@ -2,7 +2,7 @@
 
 {% block content %}
     <h1>AUCTION HOME PAGE</h1>
-    <a href="#">
+    <a href="{% url 'auctions-list' %}">
       <button class="btn btn-primary">Auctions</button>
     </a>
     <a href="{% url 'products-list' %}">

@@ -6,11 +6,13 @@ from django_extensions.db.models import TimeStampedModel, TitleDescriptionModel
 class Auction(TimeStampedModel, TitleDescriptionModel, models.Model):
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
+    minimum_bids = models.IntegerField()
+    is_approved = models.BooleanField(default=False)
     seller = models.ForeignKey(Seller, on_delete=models.CASCADE)
     unsold_product_ids = models.CharField(max_length=500, blank=True)
 
     def __str__(self):
-        return str(self.seller.user.email) + "'s auction"
+        return self.title
 
 
 class Product(TimeStampedModel, TitleDescriptionModel, models.Model):
