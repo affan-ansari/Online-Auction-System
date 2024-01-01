@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Bids</h1>
+    <a href="{% url 'bid-create' %}">
+      <button class="btn btn-outline-success">Add Bid</button>
+    </a>
+    <ul>
+      {% for bid in bids %}
+      <a href="{% url 'bid-detail' bid.id %}">
+            <li>Product: {{ bid.product.title }} - Amount: {{ bid.amount }}</li>
+          </a>
+      {% endfor %}
+    </ul>
+
+{% endblock content %}

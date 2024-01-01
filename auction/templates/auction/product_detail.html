@@ -4,6 +4,9 @@
     <h1>{{ product.title }}</h1>
     <p>{{ product.description }}</p>
     <p>{{ product.minimum_bid }}</p>
+    {% for image in images %}
+        <img src="{{ image.image.url }}" width="100px" height="100px" alt="Product Image">
+    {% endfor %}
     <a href="{% url 'product-update' product.id %}">
         <button class="btn btn-outline-primary">Edit</button>
     </a>

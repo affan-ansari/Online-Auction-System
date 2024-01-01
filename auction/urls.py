@@ -17,6 +17,16 @@ product_urls = [
     path('products/new/', views.ProductCreateView.as_view(), name='product-create'),
 ]
 
+bid_urls = [
+    path('bids/', views.BidListView.as_view(), name='bids-list'),
+    path('bids/<int:pk>', views.BidDetailView.as_view(),
+         name='bid-detail'),
+    path('bids/<int:pk>/update/', views.BidUpdateView.as_view(),
+         name='bid-update'),
+    path('bids/new/',
+         views.BidCreateView.as_view(), name='bid-create'),
+]
+
 auction_urls = [
     path('auctions/', views.AuctionListView.as_view(), name='auctions-list'),
     path('auctions/<int:pk>/', views.AuctionDetailView.as_view(),
@@ -26,4 +36,5 @@ auction_urls = [
     path('auctions/new/', views.AuctionCreateView.as_view(), name='auction-create'),
 ]
 
-urlpatterns += product_urls + auction_urls
+
+urlpatterns += product_urls + auction_urls + bid_urls

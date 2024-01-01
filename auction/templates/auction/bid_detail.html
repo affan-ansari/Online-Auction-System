@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>{{ bid.product.title }}</h1>
+    <p>{{ bid.amount }}</p>
+    <a href="{% url 'bid-update' bid.id %}">
+        <button class="btn btn-outline-primary">Edit</button>
+    </a>
+{% endblock content %}
