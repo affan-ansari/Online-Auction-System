@@ -5,9 +5,13 @@ from django_extensions.db.models import TimeStampedModel
 
 
 class User(TimeStampedModel, AbstractUser):
-    is_seller = models.BooleanField(default=False, blank=False)
-    is_buyer = models.BooleanField(default=True, blank=False)
-    is_admin = models.BooleanField(default=False, blank=False)
+    TYPE_CHOICES = (
+        ('Buyer', 'Buyer'),
+        ('Seller', 'Seller'),
+        ('Admin', 'Admin'),
+    )
+    user_type = models.CharField(
+        choices=TYPE_CHOICES, max_length=10, default='Buyer')
     email = models.EmailField(unique=True, blank=False)
     image = models.ImageField(
         upload_to='profile_images', default='profile_images/avatar.png')

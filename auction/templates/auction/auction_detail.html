@@ -1,10 +1,51 @@
 {% extends "base.html" %}
-
+{% load static %}
 {% block content %}
+<div class="title-container">
     <h1>{{ auction.title }}</h1>
-    <p>{{ auction.description }}</p>
-    <p>{{ auction.minimum_bid }}</p>
-    <a href="{% url 'auction-update' auction.id %}">
-        <button class="btn btn-outline-primary">Edit</button>
+    {% if user.user_type == 'Seller' and auction.seller.id == user.seller.id %}
+    <a class="btn btn-outline-primary w-25 anchor-btn" href="{% url 'auction-update' auction.id %}">
+        Edit
     </a>
+    {% endif %}
+</div>
+<div class="table-cont">
+    <h2>Products</h2>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Description</th>
+                <th>Minimum Bid</th>
+                {% if user.user_type == 'Buyer' %}
+                <th>Action</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for product in auction.product_set.all %}
+            <tr>
+                <td>
+                    <a href="{% url 'product-detail' product.id %}">
+                        {{ product.title }}
+                    </a>
+                </td>
+                <td>{{ product.description }}</td>
+                <td>{{ product.minimum_bid }}</td>
+                {% if user.user_type == 'Buyer' %}
+                <td>
+                    <a href="{% url 'bid-create' %}?product_id={{ product.id }}" class="btn btn-primary">Place Bid</a>
+                </td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% if auction.status == 'live' or auction.status == 'inactive' %}
+    <a class="btn btn-outline-success anchor-btn btn-block"
+        href="{% url 'product-create' %}?auction_id={{ auction.id }}">
+        List a product
+    </a>
+    {% endif %}
+</div>
 {% endblock content %}

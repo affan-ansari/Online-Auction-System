@@ -1,4 +1,5 @@
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views import View
 from .models import Product, Auction, Bid, ProductImage
@@ -12,15 +13,19 @@ def home(request):
 # PRODUCT VIEWS
 
 
-class ProductListView(View):
+class ProductListView(LoginRequiredMixin, View):
 
     def get(self, request, *args, **kwargs):
+        if request.user.user_type == 'Seller':
+            products = Product.objects.filter(seller=request.user.seller)
+        elif request.user.user_type == 'Buyer':
+            products = Product.objects.filter(auction__status='live')
         return render(request, 'auction/product_list.html', {
-            'products': Product.objects.all(),
+            'products': products,
         })
 
 
-class ProductDetailView(View):
+class ProductDetailView(LoginRequiredMixin, View):
 
     def get(self, request, pk, *args, **kwargs):
         product = get_object_or_404(Product, pk=pk)
@@ -32,10 +37,15 @@ class ProductDetailView(View):
         })
 
 
-class ProductCreateView(View):
+class ProductCreateView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
+        auction_id = request.GET.get('auction_id')
+        initial_data = {}
+        if auction_id:
+            product = get_object_or_404(Auction, id=auction_id)
+            initial_data['auction'] = product
         return render(request, 'auction/product_create.html', {
-            'form': ProductCreateForm(),
+            'form': ProductCreateForm(initial=initial_data),
         })
 
     def post(self, request, *args, **kwargs):
@@ -51,12 +61,14 @@ class ProductCreateView(View):
         return self.get(request)
 
 
-class ProductUpdateView(View):
+class ProductUpdateView(LoginRequiredMixin, View):
 
     def get(self, request, pk, *args, **kwargs):
         product = get_object_or_404(Product, pk=pk)
         form = ProductUpdateForm(instance=product)
-        form.fields['auction'].disabled = True
+        if product.auction and product.auction.status == 'live':
+            form.fields['auction'].disabled = True
+
         return render(request, 'auction/product_update.html', {
             'product': product,
             'form': form,
@@ -74,15 +86,25 @@ class ProductUpdateView(View):
 # AUCTION VIEWS
 
 
-class AuctionListView(View):
+class AuctionListView(LoginRequiredMixin, View):
 
     def get(self, request, *args, **kwargs):
-        return render(request, 'auction/auction_list.html', {
-            'auctions': Auction.objects.all(),
-        })
+        auction_groups = [
+            qs for qs in [
+                Auction.objects.filter(is_approved=True, status='live'),
+                Auction.objects.filter(is_approved=True, status='inactive'),
+                Auction.objects.filter(is_approved=True, status='closed')
+            ] if qs.exists()
+        ]
+        if request.user.user_type == 'Seller':
+            pending_auctions = Auction.objects.filter(
+                is_approved=False, status='pending')
+            if pending_auctions.exists():
+                auction_groups.append(pending_auctions)
+        return render(request, 'auction/auction_list.html', {'auction_groups': auction_groups})
 
 
-class AuctionDetailView(View):
+class AuctionDetailView(LoginRequiredMixin, View):
 
     def get(self, request, pk, *args, **kwargs):
         auction = get_object_or_404(Auction, pk=pk)
@@ -92,7 +114,7 @@ class AuctionDetailView(View):
         })
 
 
-class AuctionCreateView(View):
+class AuctionCreateView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         return render(request, 'auction/auction_create.html', {
             'form': AuctionCreateForm(),
@@ -108,7 +130,7 @@ class AuctionCreateView(View):
         return self.get(request)
 
 
-class AuctionUpdateView(View):
+class AuctionUpdateView(LoginRequiredMixin, View):
 
     def get(self, request, pk, *args, **kwargs):
         auction = get_object_or_404(Auction, pk=pk)
@@ -131,15 +153,19 @@ class AuctionUpdateView(View):
 # BID VIEWS
 
 
-class BidListView(View):
+class BidListView(LoginRequiredMixin, View):
 
     def get(self, request, *args, **kwargs):
+        if request.user.user_type == 'Seller':
+            bids = Bid.objects.filter(product__seller__user=request.user)
+        elif request.user.user_type == 'Buyer':
+            bids = Bid.objects.filter(buyer=request.user.buyer)
         return render(request, 'auction/bid_list.html', {
-            'bids': Bid.objects.all(),
+            'bids': bids,
         })
 
 
-class BidDetailView(View):
+class BidDetailView(LoginRequiredMixin, View):
 
     def get(self, request, pk, *args, **kwargs):
         bid = get_object_or_404(Bid, pk=pk)
@@ -149,23 +175,30 @@ class BidDetailView(View):
         })
 
 
-class BidCreateView(View):
+class BidCreateView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
+        product_id = request.GET.get('product_id')
+        initial_data = {}
+        if product_id:
+            product = get_object_or_404(Product, id=product_id)
+            initial_data['product'] = product
         return render(request, 'auction/bid_create.html', {
-            'form': BidCreateForm(),
+            'form': BidCreateForm(initial=initial_data),
         })
 
     def post(self, request, *args, **kwargs):
         form = BidCreateForm(data=request.POST)
         if form.is_valid():
-            form.instance.buyer = request.user.buyer
-            bid = form.save()
-            return redirect('auction-detail', pk=bid.pk)
+            product = form.cleaned_data['product']
+            if form.cleaned_data['amount'] >= product.minimum_bid:
+                form.instance.buyer = request.user.buyer
+                bid = form.save()
+                return redirect('bid-detail', pk=bid.pk)
 
         return self.get(request)
 
 
-class BidUpdateView(View):
+class BidUpdateView(LoginRequiredMixin, View):
 
     def get(self, request, pk, *args, **kwargs):
         bid = get_object_or_404(Bid, pk=pk)
@@ -179,7 +212,8 @@ class BidUpdateView(View):
         bid = get_object_or_404(Bid, pk=pk)
         form = BidUpdateForm(instance=bid, data=request.POST)
         if form.is_valid():
-            form.save()
-            return redirect('bid-detail', pk=bid.pk)
+            if form.cleaned_data['amount'] >= bid.product.minimum_bid:
+                form.save()
+                return redirect('bid-detail', pk=bid.pk)
 
         return self.get(request, pk)

@@ -29,12 +29,18 @@ class ProductCreateForm(forms.ModelForm):
         model = Product
         exclude = ['seller', 'status']
 
+    def __init__(self, *args, **kwargs):
+        super(ProductCreateForm, self).__init__(*args, **kwargs)
+        approved_auctions = Auction.objects.filter(
+            is_approved=True, status__in=['live', 'inactive'])
+        self.fields['auction'].queryset = approved_auctions
+
 
 class ProductUpdateForm(forms.ModelForm):
 
     class Meta:
         model = Product
-        exclude = ['seller', 'is_sold']
+        exclude = ['seller', 'is_sold', 'status']
 
 
 class AucionBaseForm(forms.ModelForm):
@@ -57,7 +63,7 @@ class AucionBaseForm(forms.ModelForm):
 
     class Meta:
         model = Auction
-        exclude = ['seller', 'unsold_product_ids']
+        exclude = ['seller', 'unsold_product_ids', 'is_approved', 'status']
 
 
 class AuctionCreateForm(AucionBaseForm):
@@ -72,6 +78,11 @@ class BidCreateForm(forms.ModelForm):
     class Meta:
         model = Bid
         exclude = ['buyer', 'is_winning_bid']
+
+    def __init__(self, *args, **kwargs):
+        super(BidCreateForm, self).__init__(*args, **kwargs)
+        live_products = Product.objects.filter(auction__status='live')
+        self.fields['product'].queryset = live_products
 
 
 class BidUpdateForm(forms.ModelForm):

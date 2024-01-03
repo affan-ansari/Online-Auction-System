@@ -1,16 +1,47 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1>Products</h1>
-    <a href="{% url 'product-create' %}">
-      <button class="btn btn-outline-success">Add Product</button>
-    </a>
-    <ul>
+<div class="title-container">
+  <h1>Products</h1>
+  {% if user.user_type == 'Seller' %}
+  <a class="btn btn-outline-success w-25 anchor-btn" href="{% url 'product-create' %}">
+    Add Product
+  </a>
+  {% endif %}
+</div>
+<div class="container mt-5 table-cont">
+  <h2>Live Products</h2>
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Description</th>
+        <th>Auction</th>
+        <th>Minimum bid</th>
+        {% if user.user_type == 'Buyer' %}
+        <th>Action</th>
+        {% endif %}
+      </tr>
+    </thead>
+    <tbody>
       {% for product in products %}
+      <tr>
+        <td>
           <a href="{% url 'product-detail' product.id %}">
-            <li>{{ product.title }} - Minimum Bid: {{ product.minimum_bid }}</li>
+            {{ product.title }}
           </a>
+        </td>
+        <td>{{ product.description }}</td>
+        <td>{{ product.auction.title }}</td>
+        <td>{{ product.minimum_bid }}</td>
+        {% if user.user_type == 'Buyer' %}
+        <td>
+          <a href="{% url 'bid-create' %}?product_id={{ product.id }}" class="btn btn-primary">Place Bid</a>
+        </td>
+        {% endif %}
+      </tr>
       {% endfor %}
-    </ul>
-
+    </tbody>
+  </table>
+</div>
 {% endblock content %}

@@ -1,16 +1,42 @@
 {% extends "base.html" %}
-
 {% block content %}
-    <h1>Auctions</h1>
-    <a href="{% url 'auction-create' %}">
-      <button class="btn btn-outline-success">Add Auction</button>
-    </a>
-    <ul>
+<div class="title-container">
+  <h1>Auctions</h1>
+  {% if user.user_type == 'Seller' %}
+  <a class="btn btn-outline-success w-25 anchor-btn" href="{% url 'auction-create' %}">
+    Add New Auction
+  </a>
+  {% endif %}
+</div>
+{% for auctions in auction_groups %}
+<div class="container mt-5 table-cont">
+  <h2>{{ auctions.first.status|title }} Auctions</h2>
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Description</th>
+        <th>Start Time</th>
+        <th>End Time</th>
+        <th>Total Products</th>
+      </tr>
+    </thead>
+    <tbody>
       {% for auction in auctions %}
+      <tr>
+        <td>
           <a href="{% url 'auction-detail' auction.id %}">
-            <li>{{ auction.title }} - Seller email: {{ auction.seller.user.email }}</li>
+            {{ auction.title }}
           </a>
+        </td>
+        <td>{{ auction.description }}</td>
+        <td>{{ auction.start_time }}</td>
+        <td>{{ auction.end_time }}</td>
+        <td>{{ auction.product_set.count }}</td>
+      </tr>
       {% endfor %}
-    </ul>
-
+    </tbody>
+  </table>
+</div>
+{% endfor %}
 {% endblock content %}

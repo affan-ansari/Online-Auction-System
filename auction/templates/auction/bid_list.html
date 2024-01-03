@@ -1,16 +1,41 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1>Bids</h1>
-    <a href="{% url 'bid-create' %}">
-      <button class="btn btn-outline-success">Add Bid</button>
-    </a>
-    <ul>
+<div class="title-container">
+  <h1>Bids</h1>
+  {% if user.user_type == 'Buyer' %}
+  <a class="btn btn-outline-success w-25 anchor-btn" href="{% url 'bid-create' %}">
+    Add Bid
+  </a>
+  {% endif %}
+</div>
+<div class="container mt-5 table-cont">
+  <h2>My Bids</h2>
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th>Bid ID</th>
+        <th>Product ID</th>
+        <th>Product Title</th>
+        <th>Placed by</th>
+        <th>Bid Amount</th>
+        <th>Winning Bid</th>
+      </tr>
+    </thead>
+    <tbody>
       {% for bid in bids %}
-      <a href="{% url 'bid-detail' bid.id %}">
-            <li>Product: {{ bid.product.title }} - Amount: {{ bid.amount }}</li>
-          </a>
+      <tr>
+        <td>{{ bid.id }}</td>
+        <td>{{ bid.product.id }}</td>
+        <td>
+          <a href="{% url 'product-detail' bid.product.id %}"> {{ bid.product.title }} </a>
+        </td>
+        <td>{{ bid.buyer.user.username }}</td>
+        <td>{{ bid.amount }}</td>
+        <td>{{ bid.is_winning_bid }}</td>
+      </tr>
       {% endfor %}
-    </ul>
-
+    </tbody>
+  </table>
+</div>
 {% endblock content %}
