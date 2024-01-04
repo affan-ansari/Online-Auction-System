@@ -2,6 +2,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views import View
+
+from .tasks import start_acution_task, close_acution_task
 from .models import Product, Auction, Bid, ProductImage
 from .forms import BidCreateForm, BidUpdateForm, FileFieldForm, ProductCreateForm, ProductUpdateForm, AuctionCreateForm, AuctionUpdateForm
 

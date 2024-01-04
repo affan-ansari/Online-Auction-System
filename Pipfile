@@ -32,10 +32,13 @@ toposort = "==1.10"
 traitlets = "==5.14.0"
 wcwidth = "==0.2.12"
 django-dirtyfields = "*"
-celery = "*"
+celery = {extras = ["redis"], version = "*"}
+django-celery-results = "*"
+redis = "*"
 
 [dev-packages]
 ipython = "*"
+pytz = "*"
 
 [requires]
 python_version = "3.11"

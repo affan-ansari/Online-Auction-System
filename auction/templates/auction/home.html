@@ -1,14 +1,21 @@
 {% extends "base.html" %}
+{% load tz %}
 
 {% block content %}
-    <h1>AUCTION HOME PAGE</h1>
-    <a href="{% url 'auctions-list' %}">
-      <button class="btn btn-primary">Auctions</button>
-    </a>
-    <a href="{% url 'products-list' %}">
-      <button class="btn btn-primary">Products</button>
-    </a>
-    <a href="{% url 'bids-list' %}">
-      <button class="btn btn-primary">Bids</button>
-    </a>
+<h1>AUCTION HOME PAGE</h1>
+<a href="{% url 'auctions-list' %}">
+  <button class="btn btn-primary">Auctions</button>
+</a>
+<a href="{% url 'products-list' %}">
+  <button class="btn btn-primary">Products</button>
+</a>
+<a href="{% url 'bids-list' %}">
+  <button class="btn btn-primary">Bids</button>
+</a>
+{% timezone None %}
+Server time: {{ value }}
+{% endtimezone %}
+{% timezone "Europe/Paris" %}
+Paris time: {{ value }}
+{% endtimezone %}
 {% endblock content %}
