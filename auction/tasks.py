@@ -6,10 +6,9 @@ from .models import Auction
 @shared_task
 def start_acution_task(auction_pk):
     auction = Auction.objects.get(pk=auction_pk)
-    if auction.status == 'pending':
+    if auction.status in ['pending', 'closed', 'live']:
         return
-    auction.status = 'live'
-    auction.save()
+    auction.start_auction()
     print('-------AUCTION IS LIVE----------')
     print(auction.__dict__)
 
@@ -17,10 +16,8 @@ def start_acution_task(auction_pk):
 @shared_task
 def close_acution_task(auction_pk):
     auction = Auction.objects.get(pk=auction_pk)
-    if auction.status == 'pending':
+    if auction.status in ['pending', 'closed']:
         return
-    auction.status = 'closed'
-    auction.save()
+    auction.close_auction()
     print('-------AUCTION IS CLOSED----------')
     print(auction.__dict__)
-    auction.update_products()

@@ -1,9 +1,10 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views import View
 
-from .tasks import start_acution_task, close_acution_task
+from .mixins import AuctionOwnerRequiredMixin, BidOwnerRequiredMixin, BuyerRequiredMixin, ProductOwnerRequiredMixin, SellerRequiredMixin
 from .models import Product, Auction, Bid, ProductImage
 from .forms import BidCreateForm, BidUpdateForm, FileFieldForm, ProductCreateForm, ProductUpdateForm, AuctionCreateForm, AuctionUpdateForm
 
@@ -19,11 +20,17 @@ class ProductListView(LoginRequiredMixin, View):
 
     def get(self, request, *args, **kwargs):
         if request.user.user_type == 'Seller':
-            products = Product.objects.filter(seller=request.user.seller)
+            product_list = Product.objects.filter(seller=request.user.seller)
+            products_type = 'My'
         elif request.user.user_type == 'Buyer':
-            products = Product.objects.filter(auction__status='live')
+            product_list = Product.objects.filter(auction__status='live')
+            products_type = 'Live'
+        paginator = Paginator(product_list, 10)
+        page_number = request.GET.get('page')
+        products = paginator.get_page(page_number)
         return render(request, 'auction/product_list.html', {
             'products': products,
+            'products_type': products_type,
         })
 
 
@@ -38,8 +45,17 @@ class ProductDetailView(LoginRequiredMixin, View):
             'images': images,
         })
 
+    def post(self, request, pk, *args, **kwargs):
+        product = get_object_or_404(Product, pk=pk)
+        if request.user == product.seller.user:
+            product.delete()
+            return redirect('products-list')
+        else:
+            print("NO PERMISSION")
+            return redirect('product-detail', pk=pk)
 
-class ProductCreateView(LoginRequiredMixin, View):
+
+class ProductCreateView(LoginRequiredMixin, SellerRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         auction_id = request.GET.get('auction_id')
         initial_data = {}
@@ -63,12 +79,12 @@ class ProductCreateView(LoginRequiredMixin, View):
         return self.get(request)
 
 
-class ProductUpdateView(LoginRequiredMixin, View):
+class ProductUpdateView(LoginRequiredMixin, SellerRequiredMixin, ProductOwnerRequiredMixin, View):
 
     def get(self, request, pk, *args, **kwargs):
         product = get_object_or_404(Product, pk=pk)
         form = ProductUpdateForm(instance=product)
-        if product.auction and product.auction.status == 'live':
+        if product.auction and product.auction.status in ['live', 'closed']:
             form.fields['auction'].disabled = True
 
         return render(request, 'auction/product_update.html', {
@@ -84,6 +100,20 @@ class ProductUpdateView(LoginRequiredMixin, View):
             return redirect('product-detail', pk=product.pk)
 
         return self.get(request, pk)
+
+
+class ProductOwnedView(LoginRequiredMixin, BuyerRequiredMixin, View):
+
+    def get(self, request, *args, **kwargs):
+        buyer = request.user.buyer
+        products = Product.objects.filter(
+            bid__buyer=buyer, bid__is_winning_bid=True)
+
+        return render(request, 'auction/product_list.html', {
+            'products': products,
+            'products_type': 'Owned'
+        })
+
 
 # AUCTION VIEWS
 
@@ -110,13 +140,27 @@ class AuctionDetailView(LoginRequiredMixin, View):
 
     def get(self, request, pk, *args, **kwargs):
         auction = get_object_or_404(Auction, pk=pk)
+        product_list = auction.product_set.all()
+        paginator = Paginator(product_list, 2)
+        page_number = request.GET.get('page')
+        products = paginator.get_page(page_number)
 
         return render(request, 'auction/auction_detail.html', {
             'auction': auction,
+            'products': products
         })
 
+    def post(self, request, pk, *args, **kwargs):
+        auction = get_object_or_404(Auction, pk=pk)
+        if request.user == auction.seller.user:
+            auction.delete()
+            return redirect('auctions-list')
+        else:
+            print("NO PERMISSION")
+            return redirect('auction-detail', pk=pk)
 
-class AuctionCreateView(LoginRequiredMixin, View):
+
+class AuctionCreateView(LoginRequiredMixin, SellerRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         return render(request, 'auction/auction_create.html', {
             'form': AuctionCreateForm(),
@@ -132,7 +176,7 @@ class AuctionCreateView(LoginRequiredMixin, View):
         return self.get(request)
 
 
-class AuctionUpdateView(LoginRequiredMixin, View):
+class AuctionUpdateView(LoginRequiredMixin, SellerRequiredMixin, AuctionOwnerRequiredMixin, View):
 
     def get(self, request, pk, *args, **kwargs):
         auction = get_object_or_404(Auction, pk=pk)
@@ -176,8 +220,17 @@ class BidDetailView(LoginRequiredMixin, View):
             'bid': bid,
         })
 
+    def post(self, request, pk, *args, **kwargs):
+        bid = get_object_or_404(Bid, pk=pk)
+        if request.user == bid.buyer.user:
+            bid.delete()
+            return redirect('bids-list')
+        else:
+            print("NO PERMISSION")
+            return redirect('bid-detail', pk=pk)
 
-class BidCreateView(LoginRequiredMixin, View):
+
+class BidCreateView(LoginRequiredMixin, BuyerRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         product_id = request.GET.get('product_id')
         initial_data = {}
@@ -192,7 +245,15 @@ class BidCreateView(LoginRequiredMixin, View):
         form = BidCreateForm(data=request.POST)
         if form.is_valid():
             product = form.cleaned_data['product']
-            if form.cleaned_data['amount'] >= product.minimum_bid:
+            buyer = request.user.buyer
+            bid_amount = form.cleaned_data['amount']
+            existing_bid = Bid.objects.filter(
+                buyer=buyer, product=product).first()
+            if existing_bid and bid_amount > existing_bid.amount:
+                existing_bid.amount = form.cleaned_data['amount']
+                existing_bid.save()
+                return redirect('bid-detail', pk=existing_bid.pk)
+            elif not existing_bid and bid_amount >= product.minimum_bid:
                 form.instance.buyer = request.user.buyer
                 bid = form.save()
                 return redirect('bid-detail', pk=bid.pk)
@@ -200,7 +261,7 @@ class BidCreateView(LoginRequiredMixin, View):
         return self.get(request)
 
 
-class BidUpdateView(LoginRequiredMixin, View):
+class BidUpdateView(LoginRequiredMixin, BuyerRequiredMixin, BidOwnerRequiredMixin, View):
 
     def get(self, request, pk, *args, **kwargs):
         bid = get_object_or_404(Bid, pk=pk)

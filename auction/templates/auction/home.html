@@ -12,10 +12,4 @@
 <a href="{% url 'bids-list' %}">
   <button class="btn btn-primary">Bids</button>
 </a>
-{% timezone None %}
-Server time: {{ value }}
-{% endtimezone %}
-{% timezone "Europe/Paris" %}
-Paris time: {{ value }}
-{% endtimezone %}
 {% endblock content %}

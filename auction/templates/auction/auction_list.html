@@ -3,9 +3,11 @@
 <div class="title-container">
   <h1>Auctions</h1>
   {% if user.user_type == 'Seller' %}
-  <a class="btn btn-outline-success w-25 anchor-btn" href="{% url 'auction-create' %}">
-    Add New Auction
-  </a>
+  <div class="btn-container">
+    <a class="btn btn-outline-success w-25 anchor-btn" href="{% url 'auction-create' %}">
+      Add New Auction
+    </a>
+  </div>
   {% endif %}
 </div>
 {% for auctions in auction_groups %}
@@ -18,7 +20,11 @@
         <th>Description</th>
         <th>Start Time</th>
         <th>End Time</th>
+        {% if auctions.first.status == 'closed' %}
+        <th>Sold Products</th>
+        {% else %}
         <th>Total Products</th>
+        {% endif %}
       </tr>
     </thead>
     <tbody>

@@ -15,6 +15,8 @@ product_urls = [
     path('products/<int:pk>/update/', views.ProductUpdateView.as_view(),
          name='product-update'),
     path('products/new/', views.ProductCreateView.as_view(), name='product-create'),
+    path('products/owned/', views.ProductOwnedView.as_view(), name='products-owned'),
+
 ]
 
 bid_urls = [

@@ -63,6 +63,11 @@
           <a href="{% url 'bids-list' %}">
             Bids
           </a>
+          {% if user.user_type == 'Buyer' %}
+          <a href="{% url 'products-owned' %}">
+            Owned Products
+          </a>
+          {% endif %}
         </div>
       </div>
       {% endif %}

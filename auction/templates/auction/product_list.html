@@ -4,13 +4,15 @@
 <div class="title-container">
   <h1>Products</h1>
   {% if user.user_type == 'Seller' %}
-  <a class="btn btn-outline-success w-25 anchor-btn" href="{% url 'product-create' %}">
-    Add Product
-  </a>
+  <div class="btn-container">
+    <a class="btn btn-outline-success w-25 anchor-btn" href="{% url 'product-create' %}">
+      Add Product
+    </a>
+  </div>
   {% endif %}
 </div>
 <div class="container mt-5 table-cont">
-  <h2>Live Products</h2>
+  <h2>{{ products_type }} Products</h2>
   <table class="table table-bordered">
     <thead>
       <tr>
@@ -36,12 +38,19 @@
         <td>{{ product.minimum_bid }}</td>
         {% if user.user_type == 'Buyer' %}
         <td>
+          {% if product.auction.status == 'live' %}
           <a href="{% url 'bid-create' %}?product_id={{ product.id }}" class="btn btn-primary">Place Bid</a>
+          {% else %}
+          <button class="btn btn-primary" disabled>Place Bid</button>
+          {% endif %}
         </td>
         {% endif %}
       </tr>
       {% endfor %}
     </tbody>
   </table>
+  {% include 'pagination.html' with objects=products %}
+
+
 </div>
 {% endblock content %}

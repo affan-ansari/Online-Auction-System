@@ -1,0 +1,31 @@
+<nav aria-label="Page navigation example">
+  <ul class="pagination justify-content-center">
+    <li class="page-item {% if not objects.has_previous %}disabled{% endif %}">
+      <a class="page-link" href="{% if objects.has_previous %}?page=1{% endif %}" tabindex="-1">First</a>
+    </li>
+    <li class="page-item {% if not objects.has_previous %}disabled{% endif %}">
+      <a class="page-link" href="{% if objects.has_previous %}?page={{ objects.previous_page_number }}{% endif %}"
+        tabindex="-1">Previous</a>
+    </li>
+
+    {% for page_num in objects.paginator.page_range %}
+    <li class="page-item {% if objects.number == page_num %}active{% endif %}">
+      {% if objects.number == page_num %}
+      <span class="page-link">
+        {{ page_num }}
+        <span class="sr-only">(current)</span>
+      </span>
+      {% else %}
+      <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
+      {% endif %}
+    </li>
+    {% endfor %}
+
+    <li class="page-item {% if not objects.has_next %}disabled{% endif %}">
+      <a class="page-link" href="{% if objects.has_next %}?page={{ objects.next_page_number }}{% endif %}">Next</a>
+    </li>
+    <li class="page-item {% if not objects.has_next %}disabled{% endif %}">
+      <a class="page-link" href="{% if objects.has_next %}?page={{ objects.paginator.num_pages }}{% endif %}">Last</a>
+    </li>
+  </ul>
+</nav>

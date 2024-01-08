@@ -3,3 +3,4 @@ __pycache__/
 seeds.py
 media/*
 dump.rdb
+db.sqlite3

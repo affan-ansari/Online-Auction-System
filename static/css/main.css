@@ -85,10 +85,16 @@ a.article-title:hover {
 
 .title-container {
   display: flex;
-  justify-content: space-between;
+  /* justify-content: space-between; */
   border-bottom: 2px solid #ddd; /* Bottom border style */
   /* box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); */
   padding-bottom: 10px; /* Adjust as needed */
+}
+.btn-container {
+  display: flex;
+  justify-content: flex-end;
+  flex-grow: 1;
+  gap: 1rem
 }
 
 .anchor-btn {
@@ -132,3 +138,12 @@ a.article-title:hover {
   color: #ffffff;
   background-color: #5f788a;
 }
+
+.table thead th {
+  vertical-align: top;
+  white-space: nowrap;
+}
+
+/* table {
+  white-space: nowrap;
+} */

@@ -4,9 +4,11 @@
 <div class="title-container">
   <h1>Bids</h1>
   {% if user.user_type == 'Buyer' %}
-  <a class="btn btn-outline-success w-25 anchor-btn" href="{% url 'bid-create' %}">
-    Add Bid
-  </a>
+  <div class="btn-container">
+    <a class="btn btn-outline-success w-25 anchor-btn" href="{% url 'bid-create' %}">
+      Add Bid
+    </a>
+  </div>
   {% endif %}
 </div>
 <div class="container mt-5 table-cont">

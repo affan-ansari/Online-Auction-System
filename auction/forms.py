@@ -42,6 +42,12 @@ class ProductUpdateForm(forms.ModelForm):
         model = Product
         exclude = ['seller', 'is_sold', 'status']
 
+    def __init__(self, *args, **kwargs):
+        super(ProductUpdateForm, self).__init__(*args, **kwargs)
+        approved_auctions = Auction.objects.filter(
+            is_approved=True, status__in=['live', 'inactive'])
+        self.fields['auction'].queryset = approved_auctions
+
 
 class AucionBaseForm(forms.ModelForm):
     start_time = forms.DateTimeField(

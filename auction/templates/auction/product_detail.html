@@ -27,14 +27,44 @@
             <p class="card-text">{{ product.description }}</p>
             <p class="card-text"><strong>Minimum Bid:</strong> {{ product.minimum_bid }}</p>
             {% if user.user_type == 'Seller' and user == product.seller.user %}
+            {% if product.auction.status != 'live' and product.auction.status != 'closed' %}
             <a href="{% url 'product-update' product.id %}" class="btn btn-outline-primary">Edit Product</a>
+            <button class="btn btn-outline-danger" data-toggle="modal" data-target="#deleteModal">Delete
+                Product</button>
+            {% endif %}
             {% endif %}
             {% if user.user_type == 'Buyer' %}
-            <a href="{% url 'bid-create' %}?product_id={{ product.id }}" class="btn btn-primary">
-                Place Bid
-            </a>
+            {% if product.auction.status == 'live' %}
+            <a href="{% url 'bid-create' %}?product_id={{ product.id }}" class="btn btn-primary">Place Bid</a>
+            {% else %}
+            <button class="btn btn-primary" disabled>Place Bid</button>
+            {% endif %}
             {% endif %}
         </div>
     </div>
 </div>
+<div class="container mt-5 table-cont">
+    <h2>Bids</h2>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Bid ID</th>
+                <th>Placed by</th>
+                <th>Bid Amount</th>
+                <th>Winning Bid</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for bid in product.bid_set.all %}
+            <tr>
+                <td>{{ bid.id }}</td>
+                <td>{{ bid.buyer.user.username }}</td>
+                <td>{{ bid.amount }}</td>
+                <td>{{ bid.is_winning_bid }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% include 'delete_modal.html' with object=product %}
 {% endblock content %}

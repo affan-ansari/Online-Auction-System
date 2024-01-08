@@ -4,9 +4,15 @@
 <div class="title-container">
     <h1>{{ auction.title }}</h1>
     {% if user.user_type == 'Seller' and auction.seller.id == user.seller.id %}
-    <a class="btn btn-outline-primary w-25 anchor-btn" href="{% url 'auction-update' auction.id %}">
-        Edit
-    </a>
+    {% if auction.status != 'live' and auction.status != 'closed' %}
+    <div class="btn-container">
+        <a class="btn btn-outline-primary w-25 anchor-btn" href="{% url 'auction-update' auction.id %}">
+            Edit
+        </a>
+        <button class="btn btn-outline-danger w-25 anchor-btn" data-toggle="modal"
+            data-target="#deleteModal">Delete</button>
+    </div>
+    {% endif %}
     {% endif %}
 </div>
 <div class="table-cont">
@@ -23,7 +29,7 @@
             </tr>
         </thead>
         <tbody>
-            {% for product in auction.product_set.all %}
+            {% for product in products %}
             <tr>
                 <td>
                     <a href="{% url 'product-detail' product.id %}">
@@ -34,18 +40,25 @@
                 <td>{{ product.minimum_bid }}</td>
                 {% if user.user_type == 'Buyer' %}
                 <td>
+                    {% if auction.status == 'live' %}
                     <a href="{% url 'bid-create' %}?product_id={{ product.id }}" class="btn btn-primary">Place Bid</a>
+                    {% else %}
+                    <button class="btn btn-primary" disabled>Place Bid</button>
+                    {% endif %}
                 </td>
                 {% endif %}
             </tr>
             {% endfor %}
         </tbody>
     </table>
-    {% if auction.status == 'live' or auction.status == 'inactive' %}
-    <a class="btn btn-outline-success anchor-btn btn-block"
+    {% if auction.status in 'live' or auction.status == 'inactive' %}
+    {% if user.user_type == 'Seller' %}
+    <a class="btn btn-outline-success anchor-btn btn-block mb-3"
         href="{% url 'product-create' %}?auction_id={{ auction.id }}">
         List a product
     </a>
     {% endif %}
+    {% endif %}
+    {% include 'pagination.html' with objects=products %}
 </div>
 {% endblock content %}
