@@ -5,4 +5,4 @@ media/*
 dump.rdb
 db.sqlite3
 .env
-.init-env.sh
+init-env.sh
