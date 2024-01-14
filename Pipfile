@@ -35,6 +35,7 @@ django-dirtyfields = "*"
 celery = {extras = ["redis"], version = "*"}
 django-celery-results = "*"
 redis = "*"
+django-environ = "*"
 
 [dev-packages]
 ipython = "*"
