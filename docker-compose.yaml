@@ -30,6 +30,9 @@ services:
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_HOST=${DB_HOST}
       - DB_PORT=${DB_PORT}
+      - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
+      - CELERY_CACHE_BACKEND=${CELERY_CACHE_BACKEND}
+      - CELERY_BROKER_URL=${CELERY_BROKER_URL}
     depends_on:
       - django_postgres
   celery_worker:
