@@ -56,12 +56,6 @@ services:
       - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
       - CELERY_CACHE_BACKEND=${CELERY_CACHE_BACKEND}
       - CELERY_BROKER_URL=${CELERY_BROKER_URL}
-  nginx:
-    build: ./nginx
-    ports:
-      - 1337:80
-    depends_on:
-      - auction_system
 
 
 volumes:
