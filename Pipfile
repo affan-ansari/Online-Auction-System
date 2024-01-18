@@ -36,6 +36,7 @@ celery = {extras = ["redis"], version = "*"}
 django-celery-results = "*"
 redis = "*"
 django-environ = "*"
+gunicorn = "*"
 
 [dev-packages]
 ipython = "*"
