@@ -28,7 +28,10 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG')
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = ['18.221.231.46', 'ec2-18-221-231-46.us-east-2.compute.amazonaws.com',
+                 '127.0.0.1', 'localhost', '0.0.0.0']
+CSRF_TRUSTED_ORIGINS = ['http://18.221.231.46',
+                        'http://ec2-18-221-231-46.us-east-2.compute.amazonaws.com']
 
 
 # Application definition
