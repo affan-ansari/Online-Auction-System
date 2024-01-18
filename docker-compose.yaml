@@ -16,7 +16,7 @@ services:
      - 6379:6379
   auction_system:
     build: .
-    command: sh -c "python manage.py makemigrations && python manage.py migrate && python manage.py collectstatic --noinput &&  gunicorn core.wsgi:application --bind 0.0.0.0:8000"
+    command: sh -c "python manage.py makemigrations && python manage.py migrate && python manage.py collectstatic --noinput &&  gunicorn core.wsgi:application --bind 3.19.76.232:8000"
     volumes:
       - .:/code
     ports:
@@ -56,6 +56,12 @@ services:
       - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
       - CELERY_CACHE_BACKEND=${CELERY_CACHE_BACKEND}
       - CELERY_BROKER_URL=${CELERY_BROKER_URL}
+  nginx:
+    build: ./nginx
+    ports:
+      - 1337:80
+    depends_on:
+      - auction_system
 
 
 volumes:

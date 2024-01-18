@@ -6,3 +6,5 @@ dump.rdb
 db.sqlite3
 .env
 init-env.sh
+static/admin
+static/django_extensions
